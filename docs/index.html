@@ -1,0 +1,80 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><title>CVEDB Kuwait IoT Dashboard</title><meta name=viewport content="width=device-width,initial-scale=1"><style>
+:root{--bg:#0a0e14;--panel:#111821;--panel2:#0f1620;--border:#1f2a38;--text:#d7e1ec;--muted:#7c8a9e;--accent:#00d4aa;--accent2:#1e90ff;--danger:#ff4757;--warn:#ffa502;--ok:#26de81;--mono:ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,Segoe UI,sans-serif}
+.top{display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--panel);border-bottom:1px solid var(--border)}
+.logo{font-family:var(--mono);color:var(--accent);font-weight:700}
+.badge{padding:4px 10px;border-radius:12px;background:var(--panel2);border:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.wrap{padding:22px;max-width:1400px;margin:0 auto}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px}
+h2{color:var(--accent);font-size:14px;margin:0 0 10px;font-family:var(--mono);letter-spacing:1px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:14px}
+.tile .n{font-size:28px;font-weight:700;color:var(--accent2);font-family:var(--mono)}
+.tile .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono)}
+th,td{padding:8px;border-bottom:1px solid var(--border);text-align:left}
+th{color:var(--muted);font-size:10px;letter-spacing:1px;text-transform:uppercase}
+tr:hover{background:var(--panel2)}
+.tag{display:inline-block;padding:2px 6px;background:var(--border);border-radius:3px;font-size:10px;margin:1px}
+.sev-c{background:#ff4757;color:#fff}.sev-h{background:#ffa502;color:#000}.sev-m{background:#1e90ff;color:#fff}.sev-l{background:#26de81;color:#000}
+input{background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:4px;font-family:inherit;width:100%}
+.btn{background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:6px 14px;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px}
+.btn.pri{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+.status{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--warn);animation:p 1.5s infinite}
+.dot.ok{background:var(--ok)}.dot.err{background:var(--danger)}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+</style></head><body>
+<div class=top><div class=logo>◆ CVEDB :: KW-IoT</div><span class=badge>SHODAN · CVEDB</span><span class=status style=margin-left:auto><span id=dot class=dot></span><span id=st>connecting backend...</span></span></div>
+<div class=wrap>
+<div class=card>
+<div style=display:flex;gap:10px;align-items:center>
+<input id=api placeholder="backend URL (default http://localhost:5000)" value="http://localhost:5000">
+<input id=q placeholder="filter: IP / product / port" style=max-width:280px>
+<button class="btn pri" onclick=load()>▶ FETCH</button>
+</div>
+</div>
+<div class=grid id=stats></div>
+<div class=card><h2>KUWAIT IOT DEVICES — SHODAN country:KW</h2><div id=tbl>click FETCH to load</div></div>
+<div class=card><h2>CVE LOOKUP</h2><div style=display:flex;gap:8px><input id=cve placeholder="CVE-2024-XXXXX"><button class=btn onclick=lookup()>LOOKUP</button></div><div id=cveOut style=margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--muted)>enter a CVE ID to query CVEDB</div></div>
+</div>
+<script>
+let DEVICES=[];
+function sev(s){if(s>=9)return'sev-c';if(s>=7)return'sev-h';if(s>=4)return'sev-m';return'sev-l'}
+function esc(s){return (s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}
+async function load(){
+  const base=document.getElementById('api').value.replace(/\/$/,'');
+  const dot=document.getElementById('dot'),st=document.getElementById('st');
+  dot.className='dot';st.textContent='fetching devices...';
+  try{
+    const r=await fetch(base+'/api/iot-devices');if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();DEVICES=j.matches||[];
+    dot.className='dot ok';st.textContent='✓ '+DEVICES.length+' devices loaded';
+    render();
+  }catch(e){dot.className='dot err';st.textContent='✗ '+e.message+' — is backend running?';
+    document.getElementById('tbl').innerHTML='<p style=color:var(--danger);font-family:var(--mono);font-size:12px>backend unreachable. start with: <code>cd backend && npm start</code></p>'}
+}
+function render(){
+  const f=document.getElementById('q').value.toLowerCase();
+  const d=DEVICES.filter(x=>!f||JSON.stringify(x).toLowerCase().includes(f));
+  const ports={},prods={},vulns=new Set();
+  d.forEach(x=>{ports[x.port]=(ports[x.port]||0)+1;const p=x.product||'Unknown';prods[p]=(prods[p]||0)+1;if(x.vulns)Object.keys(x.vulns).forEach(v=>vulns.add(v))});
+  document.getElementById('stats').innerHTML=[
+    ['DEVICES',d.length],['UNIQUE PORTS',Object.keys(ports).length],['PRODUCTS',Object.keys(prods).length],['CVEs EXPOSED',vulns.size]
+  ].map(([l,n])=>'<div class=tile><div class=l>'+l+'</div><div class=n>'+n+'</div></div>').join('');
+  document.getElementById('tbl').innerHTML='<table><thead><tr><th>IP</th><th>Port</th><th>Product</th><th>Org</th><th>Location</th><th>CVEs</th></tr></thead><tbody>'+
+    d.slice(0,200).map(x=>{
+      const v=x.vulns?Object.entries(x.vulns).map(([k,o])=>'<span class="tag '+sev(o&&o.cvss||0)+'">'+k+'</span>').join(''):'<span style=color:var(--muted)>—</span>';
+      return '<tr><td>'+esc(x.ip_str)+'</td><td>'+esc(x.port)+'</td><td>'+esc(x.product||'?')+'</td><td>'+esc(x.org||'?')+'</td><td>'+esc((x.location&&x.location.city)||'?')+'</td><td>'+v+'</td></tr>'
+    }).join('')+'</tbody></table>'+(d.length>200?'<p style=color:var(--muted);font-size:11px>showing 200 of '+d.length+'</p>':'');
+}
+async function lookup(){
+  const id=document.getElementById('cve').value.trim();if(!id)return;
+  const base=document.getElementById('api').value.replace(/\/$/,'');
+  const o=document.getElementById('cveOut');o.textContent='querying '+id+'...';
+  try{const r=await fetch(base+'/api/cve/'+encodeURIComponent(id));const j=await r.json();
+    o.innerHTML='<div class=card style=background:var(--panel2)><b style=color:var(--accent)>'+esc(id)+'</b> · CVSS <span class="tag '+sev(j.cvss||0)+'">'+(j.cvss||'?')+'</span><br><br>'+esc(j.summary||JSON.stringify(j).slice(0,400))+'</div>'
+  }catch(e){o.textContent='✗ '+e.message}
+}
+document.getElementById('q').addEventListener('input',render);
+</script></body></html>
