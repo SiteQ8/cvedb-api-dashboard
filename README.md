@@ -35,10 +35,6 @@ cvedb-api-dashboard/
 │   ├── server.js          # Express proxy: /api/iot-devices, /api/cve/:id
 │   ├── package.json
 │   └── .env               # SHODAN_API_KEY=...  (create this)
-├── frontend/              # Legacy React frontend (optional)
-│   └── src/
-│       ├── App.js
-│       └── DeviceList.js
 ├── docs/
 │   ├── index.html         # NEW: single-file dashboard GUI
 │   └── img/               # screenshots
@@ -95,6 +91,18 @@ PORT=5000
 ```
 
 Get a Shodan API key at https://account.shodan.io.
+
+## v2 Security Hardening
+
+- **All dependencies upgraded** — `axios 1.7.9`, `express 4.21.2`, `dotenv 16.4.7`
+- **Legacy React frontend removed** — `react-scripts 4.0.3` was dragging in 12+ transitive CVEs; replaced by single-file `docs/index.html`
+- **CORS middleware** — explicit `cors` package instead of wildcard headers
+- **Rate limiting** — 30 req/min per IP, in-memory
+- **Response caching** — 60s for device list, 10min for CVE lookups, reduces Shodan quota burn
+- **Input validation** — strict `CVE-YYYY-NNNNN` regex on `/api/cve/:id` to prevent path injection / SSRF
+- **Timeouts** — 15s on all upstream calls
+- **API key guard** — backend refuses to start if `SHODAN_API_KEY` is missing
+- **Dependabot enabled** — weekly npm dependency PRs via `.github/dependabot.yml`
 
 ## Security Notes
 
