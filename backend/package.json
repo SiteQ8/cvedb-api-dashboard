@@ -14,7 +14,7 @@
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
-    "express": "^4.21.2"
+    "express": "^5.2.1"
   },
   "author": "Ali AlEnezi <Site@hotmail.com>",
   "license": "MIT"
