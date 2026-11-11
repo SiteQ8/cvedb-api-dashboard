@@ -1,20 +1,20 @@
-# CVEDB API Dashboard — Kuwait IoT Exposure Monitor
+# CVEDB API Dashboard: Kuwait IoT Exposure Monitor
 
 Fetches internet-exposed IoT devices located in Kuwait via the Shodan API and correlates them with CVE vulnerability data from the Shodan CVEDB API. Built by Ali AlEnezi ([@SiteQ8](https://github.com/SiteQ8)).
 
 ## Overview
 
-Kuwait's external IoT attack surface — industrial controllers, routers, cameras, printers, IPMI interfaces, OT devices — is a recurring blind spot for defenders. This dashboard gives a live, filterable view of what Shodan sees in `country:KW`, with CVE overlays so you can triage which exposed devices carry known exploitable vulnerabilities.
+Kuwait's external IoT attack surface, industrial controllers, routers, cameras, printers, IPMI interfaces, OT devices, is a recurring blind spot for defenders. This dashboard gives a live, filterable view of what Shodan sees in `country:KW`, with CVE overlays so you can triage which exposed devices carry known exploitable vulnerabilities.
 
 ## Features
 
-- **Kuwait IoT device inventory** — pulls `country:KW` from Shodan
-- **CVE correlation** — per-device vulnerability tags, severity color-coded (Critical/High/Medium/Low by CVSS)
-- **Stat tiles** — device count, unique ports, product diversity, total CVE exposure
-- **Live filter** — IP / product / port / org full-text search
-- **CVE lookup tool** — query any CVE ID directly against CVEDB for summary + CVSS
-- **Dark ops-center GUI** — single-file `docs/index.html`, no build step, runs straight from GitHub Pages
-- **Node.js backend** — Express proxy to Shodan API (keeps API key server-side)
+- **Kuwait IoT device inventory**: pulls `country:KW` from Shodan
+- **CVE correlation**: per-device vulnerability tags, severity color-coded (Critical/High/Medium/Low by CVSS)
+- **Stat tiles**: device count, unique ports, product diversity, total CVE exposure
+- **Live filter**: IP / product / port / org full-text search
+- **CVE lookup tool**: query any CVE ID directly against CVEDB for summary + CVSS
+- **Dark ops-center GUI**: single-file `docs/index.html`, no build step, runs straight from GitHub Pages
+- **Node.js backend**: Express proxy to Shodan API (keeps API key server-side)
 
 ## Architecture
 
@@ -94,19 +94,19 @@ Get a Shodan API key at https://account.shodan.io.
 
 ## v2 Security Hardening
 
-- **All dependencies upgraded** — `axios 1.7.9`, `express 4.21.2`, `dotenv 16.4.7`
-- **Legacy React frontend removed** — `react-scripts 4.0.3` was dragging in 12+ transitive CVEs; replaced by single-file `docs/index.html`
-- **CORS middleware** — explicit `cors` package instead of wildcard headers
-- **Rate limiting** — 30 req/min per IP, in-memory
-- **Response caching** — 60s for device list, 10min for CVE lookups, reduces Shodan quota burn
-- **Input validation** — strict `CVE-YYYY-NNNNN` regex on `/api/cve/:id` to prevent path injection / SSRF
-- **Timeouts** — 15s on all upstream calls
-- **API key guard** — backend refuses to start if `SHODAN_API_KEY` is missing
-- **Dependabot enabled** — weekly npm dependency PRs via `.github/dependabot.yml`
+- **All dependencies upgraded**: `axios 1.7.9`, `express 4.21.2`, `dotenv 16.4.7`
+- **Legacy React frontend removed**: `react-scripts 4.0.3` was dragging in 12+ transitive CVEs; replaced by single-file `docs/index.html`
+- **CORS middleware**: explicit `cors` package instead of wildcard headers
+- **Rate limiting**: 30 req/min per IP, in-memory
+- **Response caching**: 60s for device list, 10min for CVE lookups, reduces Shodan quota burn
+- **Input validation**: strict `CVE-YYYY-NNNNN` regex on `/api/cve/:id` to prevent path injection / SSRF
+- **Timeouts**: 15s on all upstream calls
+- **API key guard**: backend refuses to start if `SHODAN_API_KEY` is missing
+- **Dependabot enabled**: weekly npm dependency PRs via `.github/dependabot.yml`
 
 ## Security Notes
 
-- API key stays on the backend — never exposed to the browser
+- API key stays on the backend: never exposed to the browser
 - Dashboard does **not** persist device data; each FETCH is a fresh query
 - Intended for defensive / authorized reconnaissance of your own or in-scope assets only
 - Respect Shodan's rate limits and terms of service
@@ -121,4 +121,4 @@ Get a Shodan API key at https://account.shodan.io.
 
 ## License
 
-MIT — © 2026 Ali AlEnezi
+MIT, © 2026 Ali AlEnezi
