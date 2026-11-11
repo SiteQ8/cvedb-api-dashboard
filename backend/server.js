@@ -1,4 +1,4 @@
-// CVEDB API Dashboard — backend proxy
+// CVEDB API Dashboard: backend proxy
 // Keeps SHODAN_API_KEY server-side, adds CORS, rate limiting, input validation
 const express = require('express');
 const axios = require('axios');
